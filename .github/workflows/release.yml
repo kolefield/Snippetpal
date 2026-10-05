@@ -1,0 +1,75 @@
+name: Build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $project = [xml](Get-Content src/Snippetpal/Snippetpal.csproj -Raw)
+          if ($env:GITHUB_REF_NAME -ne "v$($project.Project.PropertyGroup.Version)") {
+            throw 'The release tag must match the app version.'
+          }
+      - name: Build, test, and package
+        shell: pwsh
+        run: ./scripts/build.ps1 -Test -Installer
+      - name: Test installer lifecycle
+        shell: pwsh
+        run: ./scripts/test-installer.ps1
+      - name: Upload release files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Snippetpal-win-x64
+          path: artifacts/release/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: Snippetpal-win-x64
+          path: release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          cat > release-notes.md <<'NOTES'
+          Snippetpal for Windows 10/11 (x64).
+
+          Download **Snippetpal-Setup-x64.exe** below to install. For no installation, extract **Snippetpal-win-x64.zip** and open Snippetpal.exe, or download **Snippetpal.exe** directly.
+
+          Save and reorder snippets, click to copy, and browse clipboard, screenshot, and saved recording history. Light/dark themes follow Windows.
+
+          To update, choose **Quit Snippetpal** from the tray before replacing or installing files. Your library is preserved.
+
+          **Early preview:** these builds are unsigned, so Windows may show a security warning. Downloads include the .NET runtime. Installer lifecycle and automated app checks passed on a clean Windows runner; this does not replace manual UI testing.
+          NOTES
+          gh release create "$RELEASE_TAG" release/* --verify-tag --title "Snippetpal $RELEASE_TAG" --notes-file release-notes.md --latest
