@@ -51,7 +51,6 @@ internal static class NativeMethods
         {
             window.Background = Brushes.Transparent;
             if (HwndSource.FromHwnd(hwnd)?.CompositionTarget is { } target) target.BackgroundColor = Colors.Transparent;
-            int corners = 2; DwmSetWindowAttribute(hwnd, 33, ref corners, sizeof(int));
         }
         else
         {
@@ -61,6 +60,9 @@ internal static class NativeMethods
         }
         if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
         {
+            // Match the square custom frame, including when acrylic is unavailable.
+            int corners = 1; // DWMWCP_DONOTROUND
+            DwmSetWindowAttribute(hwnd, 33, ref corners, sizeof(int));
             // Full-window glass still has a separately tinted native caption underneath it.
             // Remove that fill after WindowChrome updates the frame, so the custom title bar
             // shares the same backdrop as the body. Restore the default for opaque/High Contrast.

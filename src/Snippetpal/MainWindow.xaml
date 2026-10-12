@@ -55,9 +55,9 @@
       </Border>
     </DataTemplate>
   </Window.Resources>
-  <Border x:Name="WindowFrame" Background="{DynamicResource GlassWindowBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" CornerRadius="8">
+  <Border x:Name="WindowFrame" Background="{DynamicResource GlassWindowBrush}" BorderBrush="{DynamicResource GlassBorderBrush}" BorderThickness="1" CornerRadius="0">
   <Grid><Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/></Grid.RowDefinitions>
-    <Border Grid.RowSpan="2" Background="{DynamicResource SheenBrush}" CornerRadius="8" IsHitTestVisible="False"/>
+    <Border Grid.RowSpan="2" Background="{DynamicResource SheenBrush}" CornerRadius="0" IsHitTestVisible="False"/>
     <Grid Background="Transparent">
       <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
       <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">

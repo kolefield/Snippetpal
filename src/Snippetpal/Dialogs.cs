@@ -19,7 +19,7 @@ public class AppDialog : Window
         Title = title; Width = width; SizeToContent = SizeToContent.Height; ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner; ShowInTaskbar = false;
         WindowStyle = WindowStyle.None;
-        WindowChrome.SetWindowChrome(this, new WindowChrome { CaptionHeight = 42, ResizeBorderThickness = new Thickness(0), GlassFrameThickness = new Thickness(0), UseAeroCaptionButtons = false });
+        WindowChrome.SetWindowChrome(this, new WindowChrome { CaptionHeight = 42, ResizeBorderThickness = new Thickness(0), GlassFrameThickness = new Thickness(0), CornerRadius = new CornerRadius(0), UseAeroCaptionButtons = false });
         var scroll = new ScrollViewer { Content = Body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         var chrome = new Grid(); chrome.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) }); chrome.RowDefinitions.Add(new RowDefinition());
         var caption = new Grid(); caption.ColumnDefinitions.Add(new ColumnDefinition()); caption.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -28,7 +28,7 @@ public class AppDialog : Window
         System.Windows.Automation.AutomationProperties.SetName(close, "Close dialog"); close.Click += (_, _) => DialogResult = false;
         WindowChrome.SetIsHitTestVisibleInChrome(close, true); Grid.SetColumn(close, 1); caption.Children.Add(close); chrome.Children.Add(caption);
         Grid.SetRow(scroll, 1); chrome.Children.Add(scroll);
-        var frame = new Border { Child = chrome, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(8) }; frame.SetResourceReference(Border.BorderBrushProperty, "GlassBorderBrush"); frame.SetResourceReference(Border.BackgroundProperty, "GlassWindowBrush");
+        var frame = new Border { Child = chrome, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(0) }; frame.SetResourceReference(Border.BorderBrushProperty, "GlassBorderBrush"); frame.SetResourceReference(Border.BackgroundProperty, "GlassWindowBrush");
         Content = frame; MaxHeight = SystemParameters.WorkArea.Height - 60;
         SourceInitialized += (_, _) => NativeMethods.ApplyGlass(this);
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) { DialogResult = false; e.Handled = true; } };
